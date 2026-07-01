@@ -18,4 +18,4 @@ GapLift is an AI-powered Skill Gap Analyzer built with the MERN stack and Gemini
 - Express.js
 - MongoDB
 - Gemini API
-- HTML, CSS, JavaScript
+- HTML, CSS, SCSS, JavaScript
