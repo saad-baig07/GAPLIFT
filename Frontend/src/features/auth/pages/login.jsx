@@ -10,11 +10,17 @@ const navigate = useNavigate()
 
 const [email,setEmail]=useState("")
 const [password,setPassword]=useState("")
+const [error,setError]=useState("")
 
 const handleSubmit = async(e) => {
     e.preventDefault()
-    await handleLogin({email,password})
-    navigate("/")
+    setError("")
+    try {
+        await handleLogin({email,password})
+        navigate("/")
+    } catch (err) {
+        setError(err.response?.data?.message || "Login failed. Please try again.")
+    }
 }
 if(loading)
     return <LoadingScreen />
@@ -43,6 +49,7 @@ if(loading)
 
                 <button className='button primary-button' type="submit" disabled={loading}>Login</button>
             </form>
+            {error && <p className="auth-error">{error}</p>}
              <p className="redirect-text">
             Don't have an account?
             <Link to="/register" className="auth-link">

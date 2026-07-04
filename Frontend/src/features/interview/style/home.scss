@@ -1,0 +1,169 @@
+.home {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111111;
+  color: #ffffff;
+}
+
+.interview-form {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.left,
+.right {
+  background: #1f1f1f;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.left {
+  min-height: 600px;
+}
+
+.right {
+  min-height: 600px;
+  gap: 18px;
+}
+
+.home label {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+}
+
+.input-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.self-group {
+  flex: 1;
+}
+
+.jobDescription,
+.selfDescription {
+  width: 100%;
+  box-sizing: border-box;
+  background: #2b2b2b;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  outline: none;
+  resize: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.jobDescription {
+  flex: 1;
+}
+
+.selfDescription {
+  flex: 1;
+}
+
+.jobDescription:focus,
+.selfDescription:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 5px rgba(108, 92, 231, 0.4);
+}
+
+.jobDescription::placeholder,
+.selfDescription::placeholder {
+  color: #9a9a9a;
+}
+
+input[type="file"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #2b2b2b;
+  color: white;
+  border: 1px dotted #444 ;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="file"]:hover {
+  border-color: #6c5ce7;
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #6c5ce7;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.generate-btn:hover:not(:disabled) {
+  background: #5b4ae0;
+}
+
+.generate-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+}
+
+.form-message {
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-message.error {
+  background: #4a1f1f;
+  color: #ffb3b3;
+}
+
+.form-message.success {
+  background: #1f4a2a;
+  color: #b8ffb8;
+}
+
+@media (max-width: 850px) {
+  .home {
+    padding: 15px;
+    align-items: flex-start;
+  }
+
+  .interview-form {
+    grid-template-columns: 1fr;
+  }
+
+  .left,
+  .right {
+    min-height: auto;
+  }
+
+  .jobDescription {
+    min-height: 300px;
+  }
+
+  .selfDescription {
+    min-height: 180px;
+  }
+
+  .self-group {
+    flex: unset;
+  }
+}

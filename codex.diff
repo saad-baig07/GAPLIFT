@@ -1,0 +1,1294 @@
+
+
+    }
+
+}
+
+
+
+async function getUserInterviewReportsController(req,res){
+
+    try {
+
+        const interviewReports = await interviewReportModel
+
+            .find({user:req.user.id})
+
+            .select("jobDescription matchScore skillGaps createdAt")
+
+            .sort({createdAt:-1})
+
+
+
+        res.status(200).json({
+
+            message:"Interview reports fetched successfully",
+
+            interviewReports
+
+        })
+
+    } catch (error) {
+
+        console.error(error)
+
+        res.status(500).json({
+
+            message:"Failed to fetch interview reports"
+
+        })
+
+    }
+
+}
+
+
+
+async function getInterviewReportByIdController(req,res){
+
+    try {
+
+        const interviewReport = await interviewReportModel.findOne({
+
+            _id:req.params.id,
+
+            user:req.user.id
+
+        })
+
+
+
+module.exports={generateInterviewReportController};
+
+        if(!interviewReport){
+
+            return res.status(404).json({
+
+                message:"Interview report not found"
+
+            })
+
+        }
+
+
+
+        res.status(200).json({
+
+            message:"Interview report fetched successfully",
+
+            interviewReport
+
+        })
+
+    } catch (error) {
+
+        console.error(error)
+
+        res.status(500).json({
+
+            message:"Failed to fetch interview report"
+
+        })
+
+    }
+
+}
+
+
+
+
+
+module.exports={
+
+    generateInterviewReportController,
+
+    getUserInterviewReportsController,
+
+    getInterviewReportByIdController
+
+};   
+ckend/src/routes/interview.routes.js
+ * @Route POST /api/interview
+ * @description It is used to generate interview report using self description,resume pdf and job description
+ * @access private
+ */
+interviewRouter.post("/",authMiddleware.authUser,upload.single("resume"),interviewController.generateInterviewReportController)
+
+module.exports = interviewRouter;
+ */
+interviewRouter.post("/",authMiddleware.authUser,upload.single("resume"),interviewController.generateInterviewReportController)
+
+/**
+ * @Route GET /api/interview
+ * @description It is used to fetch previous reports for the logged in user
+ * @access private
+ */
+interviewRouter.get("/",authMiddleware.authUser,interviewController.getUserInterviewReportsController)
+
+/**
+ * @Route GET /api/interview/:id
+ * @description It is used to fetch one interview report for the logged in user
+ * @access private
+ */
+interviewRouter.get("/:id",authMiddleware.authUser,interviewController.getInterviewReportByIdController)
+
+module.exports = interviewRouter;
+Frontend/src/app.routes.jsx
+import { createBrowserRouter } from "react-router"
+import Home from "../src/features/interview/pages/Home"
+import Home from "./features/interview/pages/Home"
+import Interview from "./features/interview/pages/interview"
+import Reports from "./features/interview/pages/Reports"
+import Login from "./features/auth/pages/login"
+import Register from "./features/auth/pages/register"
+import Protected from "./features/auth/components/protected"
+        element:<Protected><Home/></Protected>
+    },
+    {
+        path:"/interview/:id",
+        element:<Protected><Interview/></Protected>
+    },
+    {
+        path:"/reports",
+        element:<Protected><Reports/></Protected>
+    },
+    {
+        path:"/login",
+        element:<Login/>
+    },
+Frontend/src/features/auth/components/protected.jsx
+import { useAuth } from "../hooks/useAuth"
+import { Navigate } from "react-router"
+import { Navigate, NavLink, useNavigate } from "react-router"
+import LoadingScreen from '../../../components/LoadingScreen'
+import "./protected.scss"
+
+const Protected=({children})=> {
+    const { loading,user}=useAuth()
+    const { loading,user,handleLogout}=useAuth()
+    const navigate = useNavigate()
+
+    const logout = async () => {
+        await handleLogout()
+        navigate("/login")
+    }
+
+    if(loading)
+        return <LoadingScreen />
+    if(!user)
+        return <Navigate to="/login" replace />
+
+    return children
+    return (
+        <div className="app-shell">
+            <nav className="app-navbar">
+                <div className="navbar-left">
+                    <NavLink to="/" className="brand">GapLift</NavLink>
+                    <span className="user-greeting">Hii, {user.username}</span>
+                </div>
+                <div className="navbar-actions">
+                    <NavLink to="/reports" className="nav-button">Previous Reports</NavLink>
+                    <button className="nav-button logout-button" type="button" onClick={logout}>Logout</button>
+                </div>
+            </nav>
+            {children}
+        </div>
+    )
+}
+
+export default Protected
+Frontend/src/features/auth/components/protected.scss
+.app-shell {
+  min-height: 100vh;
+  background: #101114;
+  color: #f7f7fb;
+}
+
+.app-navbar {
+  height: 72px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #15171c;
+  border-bottom: 1px solid #2e3340;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.navbar-left,
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.user-greeting {
+  color: #cfd5e2;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nav-button {
+  min-height: 40px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #3b4252;
+  border-radius: 8px;
+  background: #20242d;
+  color: #f7f7fb;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.nav-button:hover,
+.nav-button.active {
+  background: #2b3140;
+  border-color: #8a7cff;
+}
+
+.logout-button {
+  font-family: inherit;
+}
+
+@media (max-width: 720px) {
+  .app-navbar {
+    height: auto;
+    padding: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .navbar-left,
+  .navbar-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .nav-button {
+    flex: 1;
+    padding: 0 10px;
+  }
+}
+Frontend/src/features/auth/pages/register.jsx
+    const handleSubmit = async(e) => {
+        e.preventDefault()
+        await handleRegister({username,email,password})
+        navigate("/login")
+        navigate("/")
+    }
+
+    if(loading)
+Frontend/src/features/interview/pages/Home.jsx
+import { useState } from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router'
+import { generateInterviewReport } from '../services/interview.api'
+import "../style/home.scss"
+
+function Home() {
+  const navigate = useNavigate()
+  const [jobDescription, setJobDescription] = useState("")
+  const [selfDescription, setSelfDescription] = useState("")
+  const [resume, setResume] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [report, setReport] = useState(null)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError("")
+    setReport(null)
+
+    if (!jobDescription.trim() || !selfDescription.trim() || !resume) {
+      setError("Please add job description, self description, and resume PDF.")
+
+    try {
+      setLoading(true)
+      const response = await axios.post("http://localhost:3000/api/interview", formData, {
+        withCredentials: true
+      const data = await generateInterviewReport(formData)
+      navigate(`/interview/${data.interviewReport._id}`, {
+        state: { report: data.interviewReport }
+      })
+      setReport(response.data.interviewReport)
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to generate interview report.")
+    } finally {
+
+  return (
+    <main className='home'>
+      <h1 className="page-title">Generate your report</h1>
+      <section className="home-header">
+        <p>Interview Readiness</p>
+        <h1>Generate your report</h1>
+      </section>
+      <form className="interview-form" onSubmit={handleSubmit}>
+        <div className="left">
+          <label htmlFor="jobDescription">Job Description</label>
+            ></textarea>
+          </div>
+          {error && <p className="form-message error">{error}</p>}
+          {report && <p className="form-message success">Interview report generated. Match score: {report.matchScore}%</p>}
+          <button className="generate-btn" type="submit" disabled={loading}>
+            {loading ? "Generating..." : "Generate Interview Report"}
+          </button>
+Frontend/src/features/interview/pages/Reports.jsx
+import { useEffect, useState } from "react"
+import { Link } from "react-router"
+import { getInterviewReports } from "../services/interview.api"
+import "../style/reports.scss"
+
+export default function Reports() {
+  const [reports, setReports] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadReports = async () => {
+      try {
+        const data = await getInterviewReports()
+        if (isMounted) {
+          setReports(data.interviewReports || [])
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.response?.data?.message || "Failed to load reports.")
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadReports()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  return (
+    <main className="reports-page">
+      <section className="reports-header">
+        <p>Saved Work</p>
+        <h1>Previous Reports</h1>
+      </section>
+
+      {loading && <p className="reports-message">Loading reports...</p>}
+      {error && <p className="reports-message error">{error}</p>}
+
+      {!loading && !error && reports.length === 0 && (
+        <div className="empty-reports">
+          <h2>No reports yet</h2>
+          <p>Generate an interview report and it will show up here.</p>
+          <Link to="/" className="report-link">Create Report</Link>
+        </div>
+      )}
+
+      <section className="reports-grid">
+        {reports.map((report) => (
+          <Link to={`/interview/${report._id}`} className="report-card" key={report._id}>
+            <div>
+              <span className="score-pill">{report.matchScore ?? "--"}%</span>
+              <h2>{report.jobDescription?.slice(0, 86) || "Interview Report"}</h2>
+            </div>
+            <p>{new Date(report.createdAt).toLocaleString()}</p>
+            <span>Open Report</span>
+          </Link>
+        ))}
+      </section>
+    </main>
+  )
+}
+Frontend/src/features/interview/pages/interview.jsx
+import { useState } from "react";
+import "./interview.scss";
+
+export default function Interview({ report }) {
+  const [active, setActive] = useState("technical");
+
+  const renderContent = () => {
+    switch (active) {
+      case "technical":
+        return (
+          <>
+            <h2>Technical Questions</h2>
+            {report?.technicalQuestion?.map((q, i) => (
+              <div className="card" key={i}>
+                <h3>Q{i + 1}. {q.question}</h3>
+                <div className="label">Intention</div>
+                <p>{q.intention}</p>
+                <div className="label">Suggested Answer</div>
+                <p>{q.answer}</p>
+              </div>
+            ))}
+          </>
+        );
+
+      case "behavioral":
+        return (
+          <>
+            <h2>Behavioral Questions</h2>
+            {report?.behavioralQuestion?.map((q, i) => (
+              <div className="card" key={i}>
+                <h3>Q{i + 1}. {q.question}</h3>
+                <div className="label">Intention</div>
+                <p>{q.intention}</p>
+                <div className="label">Suggested Answer</div>
+                <p>{q.answer}</p>
+              </div>
+            ))}
+          </>
+        );
+
+      case "plan":
+        return (
+          <>
+            <h2>Preparation Plan</h2>
+            {report?.preparationPlan?.map((d) => (
+              <div className="card" key={d.day}>
+                <h3>Day {d.day}</h3>
+                <div className="label">Focus</div>
+                <p>{d.focus}</p>
+                <div className="label">Tasks</div>
+                <ul>
+                  {d.tasks.map((t, i) => <li key={i}>{t}</li>)}
+                </ul>
+              </div>
+            ))}
+          </>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="interview">
+      <aside className="sidebar">
+        <button className={active==="technical"?"active":""} onClick={()=>setActive("technical")}>Technical Questions</button>
+        <button className={active==="behavioral"?"active":""} onClick={()=>setActive("behavioral")}>Behavioral Questions</button>
+        <button className={active==="plan"?"active":""} onClick={()=>setActive("plan")}>Preparation Plan</button>
+      </aside>
+
+      <main className="content">
+        <div className="score">
+          <h3>Match Score</h3>
+          <span>{report?.matchScore ?? "--"}%</span>
+        </div>
+        {renderContent()}
+      </main>
+
+      <aside className="right">
+        <h2>Skill Gaps</h2>
+        {report?.skillGaps?.map((s,i)=>(
+          <div className="skill" key={i}>
+            <strong>{s.skill}</strong>
+            <span className={`severity ${s.severity}`}>{s.severity}</span>
+          </div>
+        ))}
+      </aside>
+    </div>
+  );
+}
+import { useEffect, useMemo, useState } from "react"
+import { Link, useLocation, useParams } from "react-router"
+import { getInterviewReport } from "../services/interview.api"
+import "../style/interview.scss"
+
+const tabs = [
+  { id: "technical", label: "Technical Questions" },
+  { id: "behavioral", label: "Behavioral Questions" },
+  { id: "roadmap", label: "Road Map" }
+]
+
+export default function Interview() {
+  const { id } = useParams()
+  const location = useLocation()
+  const [active, setActive] = useState("technical")
+  const [report, setReport] = useState(location.state?.report || null)
+  const [loading, setLoading] = useState(!location.state?.report)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    if (report || !id) {
+      return
+    }
+
+    let isMounted = true
+
+    const loadReport = async () => {
+      try {
+        const data = await getInterviewReport(id)
+        if (isMounted) {
+          setReport(data.interviewReport)
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.response?.data?.message || "Failed to load interview report.")
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadReport()
+
+    return () => {
+      isMounted = false
+    }
+  }, [id, report])
+
+  const activeItems = useMemo(() => {
+    if (!report) {
+      return []
+    }
+
+    if (active === "technical") {
+      return report.technicalQuestion || []
+    }
+
+    if (active === "behavioral") {
+      return report.behavioralQuestion || []
+    }
+
+    return report.preparationPlan || []
+  }, [active, report])
+
+  const renderMainContent = () => {
+    if (loading) {
+      return <p className="interview-state">Loading report...</p>
+    }
+
+    if (error) {
+      return <p className="interview-state error">{error}</p>
+    }
+
+    if (!report) {
+      return (
+        <div className="interview-empty">
+          <h1>No report selected</h1>
+          <Link to="/" className="create-report-link">Generate Report</Link>
+        </div>
+      )
+    }
+
+    if (active === "roadmap") {
+      return (
+        <>
+          <div className="content-heading">
+            <span>Road Map</span>
+            <h1>7 day preparation plan</h1>
+          </div>
+          <div className="question-list">
+            {activeItems.map((day) => (
+              <article className="report-block" key={day.day}>
+                <div className="block-title">
+                  <span>Day {day.day}</span>
+                  <h2>{day.focus}</h2>
+                </div>
+                <ul>
+                  {day.tasks?.map((task, index) => (
+                    <li key={index}>{task}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </>
+      )
+    }
+
+    return (
+      <>
+        <div className="content-heading">
+          <span>{active === "technical" ? "Technical Round" : "Behavioral Round"}</span>
+          <h1>{active === "technical" ? "Technical questions" : "Behavioral questions"}</h1>
+        </div>
+        <div className="question-list">
+          {activeItems.map((item, index) => (
+            <article className="report-block" key={`${active}-${index}`}>
+              <div className="block-title">
+                <span>Question {index + 1}</span>
+                <h2>{item.question}</h2>
+              </div>
+              <section>
+                <h3>Intention</h3>
+                <p>{item.intention}</p>
+              </section>
+              <section>
+                <h3>Suggested Answer</h3>
+                <p>{item.answer}</p>
+              </section>
+            </article>
+          ))}
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <main className="interview-page">
+      <aside className="interview-left">
+        <div className="score-box">
+          <span>Match Score</span>
+          <strong>{report?.matchScore ?? "--"}%</strong>
+        </div>
+        <nav className="interview-tabs" aria-label="Interview report sections">
+          {tabs.map((tab) => (
+            <button
+              className={active === tab.id ? "active" : ""}
+              key={tab.id}
+              type="button"
+              onClick={() => setActive(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <section className="interview-main">
+        {renderMainContent()}
+      </section>
+
+      <aside className="interview-right">
+        <h2>Skill Gaps</h2>
+        <div className="skill-list">
+          {(report?.skillGaps || []).map((skill, index) => (
+            <div className="skill-chip" key={`${skill.skill}-${index}`}>
+              <span>{skill.skill}</span>
+              <strong className={`severity ${skill.severity}`}>{skill.severity}</strong>
+            </div>
+          ))}
+          {!loading && report && (report.skillGaps || []).length === 0 && (
+            <p>No skill gaps returned.</p>
+          )}
+        </div>
+      </aside>
+    </main>
+  )
+}
+Frontend/src/features/interview/services/interview.api.js
+import axios from "axios"
+
+const interviewApi = axios.create({
+  baseURL: "http://localhost:3000/api/interview",
+  withCredentials: true
+})
+
+export async function generateInterviewReport(formData) {
+  const response = await interviewApi.post("/", formData)
+  return response.data
+}
+
+export async function getInterviewReports() {
+  const response = await interviewApi.get("/")
+  return response.data
+}
+
+export async function getInterviewReport(id) {
+  const response = await interviewApi.get(`/${id}`)
+  return response.data
+}
+Frontend/src/features/interview/style/home.scss
+.home {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  min-height: calc(100vh - 72px);
+  padding: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  background: #111111;
+  background: #101114;
+  color: #ffffff;
+}
+
+.page-title {
+.home-header {
+  width: 100%;
+  max-width: 1100px;
+}
+
+.home-header p {
+  color: #8a7cff;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.home-header h1 {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.left,
+.right {
+  background: #1f1f1f;
+  border: 1px solid #3a3a3a;
+  background: #171a20;
+  border: 1px solid #343b49;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+.selfDescription {
+  width: 100%;
+  box-sizing: border-box;
+  background: #2b2b2b;
+  background: #101217;
+  color: white;
+  border: 1px solid #444;
+  border: 1px solid #3b4252;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+
+.jobDescription:focus,
+.selfDescription:focus {
+  border-color: #6c5ce7;
+  box-shadow: 0 0 5px rgba(108, 92, 231, 0.4);
+  border-color: #8a7cff;
+  box-shadow: 0 0 0 3px rgba(138, 124, 255, 0.16);
+}
+
+.jobDescription::placeholder,
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #2b2b2b;
+  background: #101217;
+  color: white;
+  border: 1px dotted #444 ;
+  border: 1px dotted #3b4252;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="file"]:hover {
+  border-color: #6c5ce7;
+  border-color: #8a7cff;
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #6c5ce7;
+  background: #8a7cff;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.generate-btn:hover:not(:disabled) {
+  background: #5b4ae0;
+  background: #7668ec;
+}
+
+.generate-btn:disabled {
+
+@media (max-width: 850px) {
+  .home {
+    padding: 15px;
+    padding: 22px 16px;
+    align-items: flex-start;
+  }
+
+Frontend/src/features/interview/style/interview.scss
+$bg:#0f1117;
+$panel:#171b22;
+$card:#1e2430;
+$border:#313949;
+$text:#f3f4f6;
+$muted:#b6bcc8;
+$accent:#7c5cff;
+
+*{box-sizing:border-box}
+
+.interview{
+display:grid;
+grid-template-columns:240px 1fr 300px;
+height:100vh;
+background:$bg;
+color:$text;
+}
+
+.sidebar,.right{
+background:$panel;
+padding:24px;
+border-right:1px solid $border;
+overflow:auto;
+}
+
+.right{border-right:none;border-left:1px solid $border;}
+
+.sidebar button{
+width:100%;
+padding:14px;
+margin-bottom:14px;
+border-radius:12px;
+background:transparent;
+border:1px solid $border;
+color:$text;
+cursor:pointer;
+transition:.25s;
+}
+
+.sidebar button:hover{border-color:$accent;}
+.sidebar .active{background:$accent;border-color:$accent;}
+
+.content{
+padding:30px;
+overflow:auto;
+}
+
+.score{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:$card;
+border:1px solid $border;
+padding:18px 22px;
+border-radius:14px;
+margin-bottom:24px;
+}
+
+.score span{
+font-size:28px;
+font-weight:700;
+color:$accent;
+}
+
+.card{
+background:$card;
+border:1px solid $border;
+border-radius:14px;
+padding:20px;
+margin-bottom:20px;
+}
+
+.card h3{margin:0 0 12px;}
+.label{
+margin-top:12px;
+color:$accent;
+font-weight:600;
+}
+
+.card p,.card li{
+color:$muted;
+line-height:1.7;
+}
+
+.skill{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px;
+margin-bottom:12px;
+background:$card;
+border-radius:12px;
+border:1px solid $border;
+}
+
+.severity{
+padding:5px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:700;
+text-transform:uppercase;
+}
+
+.low{background:#2e7d32;}
+.medium{background:#ef6c00;}
+.high{background:#c62828;}
+
+@media(max-width:1100px){
+.interview{grid-template-columns:220px 1fr;}
+.right{display:none;}
+}
+
+@media(max-width:768px){
+.interview{grid-template-columns:1fr;}
+.sidebar{
+display:flex;
+gap:12px;
+overflow:auto;
+}
+.sidebar button{min-width:220px;margin:0;}
+}
+.interview-page {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr) 300px;
+  background: #0f1013;
+  color: #f7f7fb;
+  border-top: 1px solid #262b36;
+}
+
+.interview-left,
+.interview-right {
+  min-height: calc(100vh - 72px);
+  padding: 28px 18px;
+  background: #13161c;
+}
+
+.interview-left {
+  border-right: 1px solid #343b49;
+}
+
+.interview-right {
+  border-left: 1px solid #343b49;
+}
+
+.score-box {
+  padding: 16px;
+  margin-bottom: 28px;
+  border: 1px solid #343b49;
+  border-radius: 8px;
+  background: #191d25;
+}
+
+.score-box span,
+.content-heading span,
+.block-title span {
+  color: #9ba5bb;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.score-box strong {
+  display: block;
+  margin-top: 4px;
+  color: #b9b1ff;
+  font-size: 32px;
+}
+
+.interview-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.interview-tabs button {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #3b4252;
+  border-radius: 8px;
+  background: transparent;
+  color: #f7f7fb;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.interview-tabs button:hover,
+.interview-tabs button.active {
+  background: #252b38;
+  border-color: #8a7cff;
+}
+
+.interview-main {
+  padding: 34px;
+  overflow: auto;
+}
+
+.content-heading {
+  margin-bottom: 18px;
+}
+
+.content-heading h1 {
+  margin-top: 6px;
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.question-list {
+  display: grid;
+  gap: 16px;
+}
+
+.report-block {
+  padding: 22px;
+  border: 1px solid #343b49;
+  border-radius: 8px;
+  background: #171a20;
+}
+
+.block-title h2 {
+  margin-top: 8px;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+.report-block section,
+.report-block ul {
+  margin-top: 18px;
+}
+
+.report-block h3 {
+  margin-bottom: 6px;
+  color: #b9b1ff;
+  font-size: 14px;
+}
+
+.report-block p,
+.report-block li,
+.skill-list p {
+  color: #c4cad7;
+  line-height: 1.7;
+}
+
+.report-block ul {
+  padding-left: 20px;
+}
+
+.interview-right h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.skill-chip {
+  width: 100%;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #343b49;
+  border-radius: 8px;
+  background: #191d25;
+}
+
+.skill-chip span {
+  font-weight: 700;
+}
+
+.severity {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.severity.low {
+  background: #2f7d4c;
+}
+
+.severity.medium {
+  background: #b56a20;
+}
+
+.severity.high {
+  background: #b43e4a;
+}
+
+.interview-state,
+.interview-empty {
+  color: #c4cad7;
+}
+
+.interview-state.error {
+  color: #ffb4b4;
+}
+
+.interview-empty h1 {
+  margin-bottom: 14px;
+}
+
+.create-report-link {
+  color: #b9b1ff;
+  font-weight: 800;
+}
+
+@media (max-width: 1120px) {
+  .interview-page {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+
+  .interview-right {
+    min-height: auto;
+    grid-column: 1 / -1;
+    border-left: none;
+    border-top: 1px solid #343b49;
+  }
+
+  .skill-chip {
+    width: fit-content;
+  }
+}
+
+@media (max-width: 760px) {
+  .interview-page {
+    grid-template-columns: 1fr;
+  }
+
+  .interview-left,
+  .interview-right {
+    min-height: auto;
+    padding: 18px 16px;
+    border-left: none;
+    border-right: none;
+  }
+
+  .interview-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .interview-tabs button {
+    min-width: 170px;
+  }
+
+  .interview-main {
+    padding: 24px 16px;
+  }
+}
+Frontend/src/features/interview/style/reports.scss
+.reports-page {
+  min-height: calc(100vh - 72px);
+  padding: 34px;
+  background: #101114;
+}
+
+.reports-header {
+  max-width: 1180px;
+  margin: 0 auto 22px;
+}
+
+.reports-header p {
+  color: #8a7cff;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.reports-header h1 {
+  margin-top: 6px;
+  font-size: 32px;
+}
+
+.reports-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.report-card,
+.empty-reports {
+  border: 1px solid #343b49;
+  border-radius: 8px;
+  background: #171a20;
+  color: #f7f7fb;
+}
+
+.report-card {
+  min-height: 210px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.report-card:hover {
+  border-color: #8a7cff;
+  transform: translateY(-2px);
+}
+
+.score-pill {
+  width: fit-content;
+  padding: 6px 10px;
+  display: inline-flex;
+  border-radius: 999px;
+  background: #2e3140;
+  color: #b9b1ff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.report-card h2 {
+  margin-top: 14px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.report-card p {
+  color: #aeb5c5;
+  font-size: 13px;
+}
+
+.report-card > span:last-child,
+.report-link {
+  color: #b9b1ff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.reports-message,
+.empty-reports {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.reports-message.error {
+  color: #ffb4b4;
+}
+
+.empty-reports {
+  padding: 28px;
+}
+
+.empty-reports p {
+  margin: 8px 0 18px;
+  color: #aeb5c5;
+}
+
+@media (max-width: 720px) {
+  .reports-page {
+    padding: 22px 16px;
+  }
+}

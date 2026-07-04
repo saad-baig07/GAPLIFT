@@ -15,8 +15,10 @@ authRouter.post("/register",authController.registerUserController)
  * @description user can login form here
  * @access public
  */
-authRouter.post("/login",authController.userLoginController)
-
+authRouter.post("/login", (req, res, next) => {
+    console.log("🔥 LOGIN ROUTE HIT");
+    next();
+}, authController.userLoginController);
 /**
  * @routes GET /api/auth/logout
  * @description remove token from cookies and add token into blacklist

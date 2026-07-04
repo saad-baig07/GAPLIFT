@@ -102,6 +102,18 @@ main {
     font-size: 0.95rem;
   }
 
+  .auth-error {
+    margin-top: 1rem;
+    padding: 10px 12px;
+    border: 1px solid #6d2d37;
+    border-radius: 6px;
+    background: #2a1519;
+    color: #ffb4bd;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    text-align: center;
+  }
+
   .auth-link {
     color: #8b85ff;
     text-decoration: none;
