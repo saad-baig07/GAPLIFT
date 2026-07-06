@@ -7,7 +7,7 @@ const app = express();
 
 app.use(
     cors({
-        origin: "gaplift.vercel.app",
+        origin: "https://gaplift.vercel.app",
         credentials: true,
     })
 );
