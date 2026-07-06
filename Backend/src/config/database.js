@@ -15,11 +15,11 @@ mongoose.connection.on("disconnected", () => {
 });
 
 async function connectToDB() {
-    if (!process.env.MONGO_URI) {
-        throw new Error("MONGO_URI is missing in .env");
-    }
+    // if (!process.env.MONGO_URI) {
+    //     throw new Error("MONGO_URI is missing in .env");
+    // }
 
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect("mongodb+srv://gaplift:gaplift@gaplift.nazv5yi.mongodb.net/gaplift");
 
     console.log("Database:", mongoose.connection.db.databaseName);
     console.log("Ready State:", mongoose.connection.readyState);

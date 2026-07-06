@@ -15,6 +15,12 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+
+app.use((req, res, next) => {
+    console.log("Incoming:", req.method, req.originalUrl);
+    next();
+});
+
 app.use((req, res, next) => {
     if (
         req.path.startsWith("/api") &&

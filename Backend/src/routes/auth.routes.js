@@ -17,6 +17,7 @@ authRouter.post("/register",authController.registerUserController)
  */
 authRouter.post("/login", (req, res, next) => {
     console.log("🔥 LOGIN ROUTE HIT");
+    console.log("shubham test inside post login")
     next();
 }, authController.userLoginController);
 /**
